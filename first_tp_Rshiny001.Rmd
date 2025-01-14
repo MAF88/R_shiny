@@ -1,0 +1,94 @@
+---
+title: "firt_tp_rshiny"
+output: 
+  html_document:
+    code_folding: hide
+date: "2025-01-14"
+runtime: shiny
+params:
+  shiny_runtime: shiny
+---
+
+
+```{r}
+library(shiny)
+
+# Interface utilisateur
+ui <- fluidPage(
+  titlePanel("Application Shiny combinée"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      h3("Exercice 1 : Saluer l'utilisateur"),
+      textInput("nom", "Quel est ton nom ?", value = ""),
+      
+      h3("Exercice 4 : Multiplication personnalisée"),
+      numericInput("x", "Entrez un nombre (x) :", value = 1, min = 1, max = 100),
+      numericInput("y", "Entrez un multiplicateur (y) :", value = 1, min = 1, max = 100),
+      
+      h3("Exercice 5 : Analyse de données"),
+      selectInput("dataset", "Choisissez un dataset :", choices = c("mtcars", "iris", "airquality")),
+      actionButton("resumer", "Afficher le résumé statistique"),
+      actionButton("tracer", "Afficher le graphe")
+    ),
+    
+    mainPanel(
+      h3("Résultats"),
+      h4("Salutation :"),
+      textOutput("salutation"),
+      
+      h4("Résultat de la multiplication :"),
+      textOutput("multiplication"),
+      
+      h4("Résumé statistique :"),
+      verbatimTextOutput("summary"),
+      
+      h4("Graphe :"),
+      plotOutput("plot")
+    )
+  )
+)
+
+# Serveur
+server <- function(input, output) {
+  # Exercice 1 : Salutation
+  output$salutation <- renderText({
+    if (input$nom != "") {
+      paste0("Bonjour, ", input$nom, " !")
+    } else {
+      "Bonjour, utilisateur !"
+    }
+  })
+  
+  # Exercice 4 : Multiplication
+  output$multiplication <- renderText({
+    paste("Résultat :", input$x * input$y)
+  })
+  
+  # Exercice 5 : Analyse de données
+  datasetInput <- reactive({
+    switch(input$dataset,
+           "mtcars" = mtcars,
+           "iris" = iris,
+           "airquality" = airquality)
+  })
+  
+  observeEvent(input$resumer, {
+    output$summary <- renderPrint({
+      summary(datasetInput())
+    })
+  })
+  
+  observeEvent(input$tracer, {
+    output$plot <- renderPlot({
+      plot(datasetInput())
+    })
+  })
+}
+
+# Lancer l'application shiny
+shinyApp(ui = ui, server = server)
+
+
+```
+
